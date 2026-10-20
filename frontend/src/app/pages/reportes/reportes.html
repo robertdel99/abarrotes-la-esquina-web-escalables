@@ -1,0 +1,230 @@
+<div class="mb-3">
+  <h2 class="h4 mb-0">Reportes</h2>
+  @if (rangoAplicado(); as rango) {
+    <small class="text-secondary"
+      >Del {{ rango.desde | date: 'dd/MM/yyyy' }} al {{ rango.hasta | date: 'dd/MM/yyyy' }}</small
+    >
+  }
+</div>
+
+@if (!esAdministrador()) {
+  <div class="alert alert-warning">Sólo el administrador puede ver los reportes.</div>
+} @else {
+  <form class="card mb-4" [formGroup]="formulario" (ngSubmit)="onSubmit()" novalidate>
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-sm-4 col-md-3">
+          <label class="form-label mb-1" for="desde">Desde</label>
+          <input
+            id="desde"
+            type="date"
+            class="form-control"
+            formControlName="desde"
+            [attr.max]="hoy"
+            [class.is-invalid]="
+              (formulario.controls.desde.touched && formulario.controls.desde.invalid) ||
+              formulario.hasError('rangoInvalido')
+            "
+          />
+          @if (
+            formulario.controls.desde.touched && formulario.controls.desde.hasError('required')
+          ) {
+            <div class="invalid-feedback">La fecha inicial es obligatoria</div>
+          }
+        </div>
+        <div class="col-sm-4 col-md-3">
+          <label class="form-label mb-1" for="hasta">Hasta</label>
+          <input
+            id="hasta"
+            type="date"
+            class="form-control"
+            formControlName="hasta"
+            [attr.max]="hoy"
+            [class.is-invalid]="
+              (formulario.controls.hasta.touched && formulario.controls.hasta.invalid) ||
+              formulario.hasError('rangoInvalido')
+            "
+          />
+          @if (
+            formulario.controls.hasta.touched && formulario.controls.hasta.hasError('required')
+          ) {
+            <div class="invalid-feedback">La fecha final es obligatoria</div>
+          }
+        </div>
+        <div class="col-sm-4 col-md-3">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="formulario.invalid || cargando()"
+          >
+            @if (cargando()) {
+              <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+            }
+            Actualizar
+          </button>
+        </div>
+      </div>
+      @if (formulario.hasError('rangoInvalido')) {
+        <div class="text-danger small mt-2">La fecha "desde" no puede ser posterior a "hasta"</div>
+      }
+    </div>
+  </form>
+
+  @if (cargando() && !cargado()) {
+    <div class="text-center text-secondary py-5">
+      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      Cargando reportes...
+    </div>
+  } @else if (fallo() && !cargado()) {
+    <p class="text-secondary">
+      No se pudieron cargar los reportes. Revisa las fechas e intenta de nuevo.
+    </p>
+  } @else if (resumen(); as r) {
+    <div class="row g-3 mb-4">
+      <div class="col-sm-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="small text-secondary">Total vendido</div>
+            <div class="h4 mb-0 text-primary">
+              {{ r.totalVentas | currency: 'MXN' : 'symbol-narrow' }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="small text-secondary">Número de tickets</div>
+            <div class="h4 mb-0">{{ r.numeroTickets }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="small text-secondary">Ticket promedio</div>
+            <div class="h4 mb-0">{{ r.ticketPromedio | currency: 'MXN' : 'symbol-narrow' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header bg-white fw-semibold">Ventas por día</div>
+      @if (dias().length) {
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th class="text-end">Tickets</th>
+                <th class="text-end">Total</th>
+                <th class="w-50 d-none d-md-table-cell"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (dia of dias(); track $index) {
+                <tr>
+                  <td>{{ dia.fecha | date: 'dd/MM/yyyy' }}</td>
+                  <td class="text-end">{{ dia.tickets }}</td>
+                  <td class="text-end">{{ dia.total | currency: 'MXN' : 'symbol-narrow' }}</td>
+                  <td class="d-none d-md-table-cell">
+                    <div
+                      class="progress"
+                      style="height: 10px"
+                      role="progressbar"
+                      [attr.aria-valuenow]="dia.porcentaje"
+                      aria-valuemin="0"
+                      aria-valuemax="100"
+                    >
+                      <div class="progress-bar bg-primary" [style.width.%]="dia.porcentaje"></div>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="card-body text-secondary">Sin ventas en el periodo.</div>
+      }
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-header bg-white fw-semibold">Productos más vendidos</div>
+          @if (productos().length) {
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Producto</th>
+                    <th class="text-end">Cantidad</th>
+                    <th class="text-end">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (p of productos(); track $index) {
+                    <tr>
+                      <td class="text-secondary">{{ $index + 1 }}</td>
+                      <td>{{ p.nombre }}</td>
+                      <td class="text-end">{{ p.cantidad | number: '1.0-2' }}</td>
+                      <td class="text-end">{{ p.total | currency: 'MXN' : 'symbol-narrow' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="card-body text-secondary">Sin ventas en el periodo.</div>
+          }
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-header bg-white fw-semibold">Ventas por categoría</div>
+          @if (categorias().length) {
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Categoría</th>
+                    <th class="text-end">Cantidad</th>
+                    <th class="text-end">Total</th>
+                    <th class="w-25"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of categorias(); track $index) {
+                    <tr>
+                      <td>{{ c.nombre }}</td>
+                      <td class="text-end">{{ c.cantidad | number: '1.0-2' }}</td>
+                      <td class="text-end">{{ c.total | currency: 'MXN' : 'symbol-narrow' }}</td>
+                      <td>
+                        <div
+                          class="progress"
+                          style="height: 10px"
+                          role="progressbar"
+                          [attr.aria-valuenow]="c.porcentaje"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                        >
+                          <div class="progress-bar bg-primary" [style.width.%]="c.porcentaje"></div>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="card-body text-secondary">Sin ventas en el periodo.</div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+}

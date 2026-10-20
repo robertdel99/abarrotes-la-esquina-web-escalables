@@ -1,0 +1,149 @@
+<h2 class="h4 mb-1">Mi cuenta</h2>
+<p class="text-secondary mb-4">
+  <span class="badge text-bg-primary">{{ nombreRol() }}</span>
+  <span class="ms-2">{{ usuario()?.correo }}</span>
+</p>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h3 class="h5 mb-3">Datos personales</h3>
+
+        <form [formGroup]="formDatos" (ngSubmit)="onDatosSubmit()" novalidate>
+          <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input
+              id="nombre"
+              type="text"
+              class="form-control"
+              formControlName="nombre"
+              autocomplete="given-name"
+              [class.is-invalid]="invalido(formDatos.controls.nombre)"
+            />
+            @if (invalido(formDatos.controls.nombre)) {
+              <div class="invalid-feedback">El nombre es obligatorio</div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label for="apellidos" class="form-label">Apellidos</label>
+            <input
+              id="apellidos"
+              type="text"
+              class="form-control"
+              formControlName="apellidos"
+              autocomplete="family-name"
+              [class.is-invalid]="invalido(formDatos.controls.apellidos)"
+            />
+            @if (invalido(formDatos.controls.apellidos)) {
+              <div class="invalid-feedback">Los apellidos son obligatorios</div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label for="correo" class="form-label">Correo</label>
+            <input
+              id="correo"
+              type="email"
+              class="form-control"
+              formControlName="correo"
+              autocomplete="email"
+              [class.is-invalid]="invalido(formDatos.controls.correo)"
+            />
+            @if (invalido(formDatos.controls.correo)) {
+              <div class="invalid-feedback">
+                @if (formDatos.controls.correo.hasError('required')) {
+                  El correo es obligatorio
+                } @else {
+                  Escribe un correo válido
+                }
+              </div>
+            }
+          </div>
+
+          <button type="submit" class="btn btn-primary" [disabled]="guardandoDatos()">
+            @if (guardandoDatos()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              Guardando...
+            } @else {
+              Guardar
+            }
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h3 class="h5 mb-3">Cambiar contraseña</h3>
+
+        <form [formGroup]="formContrasena" (ngSubmit)="onContrasenaSubmit()" novalidate>
+          <div class="mb-3">
+            <label for="contrasenaActual" class="form-label">Contraseña actual</label>
+            <input
+              id="contrasenaActual"
+              type="password"
+              class="form-control"
+              formControlName="contrasenaActual"
+              autocomplete="current-password"
+              [class.is-invalid]="invalido(formContrasena.controls.contrasenaActual)"
+            />
+            @if (invalido(formContrasena.controls.contrasenaActual)) {
+              <div class="invalid-feedback">Escribe tu contraseña actual</div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label for="contrasena" class="form-label">Nueva contraseña</label>
+            <input
+              id="contrasena"
+              type="password"
+              class="form-control"
+              formControlName="contrasena"
+              autocomplete="new-password"
+              [class.is-invalid]="invalido(formContrasena.controls.contrasena)"
+            />
+            @if (invalido(formContrasena.controls.contrasena)) {
+              <div class="invalid-feedback">
+                @if (formContrasena.controls.contrasena.hasError('required')) {
+                  La nueva contraseña es obligatoria
+                } @else {
+                  Debe tener al menos 8 caracteres
+                }
+              </div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label for="confirmar" class="form-label">Confirmar nueva contraseña</label>
+            <input
+              id="confirmar"
+              type="password"
+              class="form-control"
+              formControlName="confirmar"
+              autocomplete="new-password"
+              [class.is-invalid]="invalido(formContrasena.controls.confirmar) || noCoinciden()"
+            />
+            @if (invalido(formContrasena.controls.confirmar)) {
+              <div class="invalid-feedback">Confirma la nueva contraseña</div>
+            } @else if (noCoinciden()) {
+              <div class="invalid-feedback">Las contraseñas no coinciden</div>
+            }
+          </div>
+
+          <button type="submit" class="btn btn-primary" [disabled]="guardandoContrasena()">
+            @if (guardandoContrasena()) {
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              Guardando...
+            } @else {
+              Cambiar contraseña
+            }
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

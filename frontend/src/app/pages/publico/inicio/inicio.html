@@ -1,0 +1,97 @@
+<section class="text-center py-4 mb-4">
+  <h1 class="h2 text-primary mb-2">{{ tienda()?.nombre ?? 'Abarrotes La Esquina' }}</h1>
+  <p class="text-secondary mb-3">Lo que necesitas para tu casa, a la vuelta de la esquina.</p>
+  <a routerLink="/catalogo" class="btn btn-primary">Ver catálogo</a>
+</section>
+
+<section class="mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 mb-0">Ofertas de la semana</h2>
+    @if (ofertas().length > 0) {
+      <a routerLink="/catalogo" [queryParams]="{ ofertas: true }" class="small">Ver todas</a>
+    }
+  </div>
+
+  @if (cargandoOfertas()) {
+    <div class="d-flex align-items-center gap-2 text-secondary">
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      Cargando ofertas...
+    </div>
+  } @else if (ofertas().length === 0) {
+    <p class="text-secondary">No hay ofertas por el momento.</p>
+  } @else {
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+      @for (p of ofertas(); track p._id) {
+        <div class="col">
+          <div class="card h-100 tarjeta-producto">
+            @if (tieneImagen(p)) {
+              <img
+                [src]="p.imagen"
+                [alt]="p.nombre"
+                class="card-img-top"
+                (error)="onImagenError(p._id)"
+              />
+            } @else {
+              <div
+                class="sin-imagen card-img-top d-flex align-items-center justify-content-center text-secondary small"
+              >
+                Sin imagen
+              </div>
+            }
+            <div class="card-body d-flex flex-column">
+              <h3 class="h6 mb-1">
+                <a
+                  [routerLink]="['/catalogo', p._id]"
+                  class="stretched-link text-reset text-decoration-none"
+                  >{{ p.nombre }}</a
+                >
+              </h3>
+              <p class="small text-secondary mb-2">{{ nombreDe(p.categoria) }}</p>
+              <div class="mt-auto">
+                <span class="text-decoration-line-through text-secondary small me-1">{{
+                  p.precioVenta | currency: 'MXN' : 'symbol-narrow'
+                }}</span>
+                <span class="fw-semibold text-primary">{{
+                  p.precioOferta | currency: 'MXN' : 'symbol-narrow'
+                }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>
+
+<section class="mb-4">
+  <h2 class="h4 mb-3">Visítanos</h2>
+  @if (cargandoTienda()) {
+    <div class="d-flex align-items-center gap-2 text-secondary">
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      Cargando datos de la tienda...
+    </div>
+  } @else if (tienda(); as t) {
+    <div class="card">
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <p class="small text-secondary mb-1">Dirección</p>
+            <p class="mb-0">{{ t.direccion }}</p>
+          </div>
+          <div class="col-12 col-md-4">
+            <p class="small text-secondary mb-1">Teléfono</p>
+            <p class="mb-0">
+              <a [href]="enlaceTelefono(t.telefono)">{{ t.telefono }}</a>
+            </p>
+          </div>
+          <div class="col-12 col-md-4">
+            <p class="small text-secondary mb-1">Horarios</p>
+            <p class="mb-0">{{ t.horarios }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <p class="text-secondary">No se pudieron cargar los datos de la tienda.</p>
+  }
+</section>

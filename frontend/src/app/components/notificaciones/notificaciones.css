@@ -1,0 +1,12 @@
+:host {
+  display: block;
+}
+
+.contenedor-toasts {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1080;
+  min-width: 280px;
+  max-width: 360px;
+}

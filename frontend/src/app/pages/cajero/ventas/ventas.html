@@ -1,0 +1,191 @@
+<h2 class="h4 mb-3">Ventas</h2>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form [formGroup]="filtros" (ngSubmit)="onBuscarSubmit()" novalidate>
+      <div class="row g-2 align-items-end">
+        <div class="col-6 col-md-3 col-lg-2">
+          <label for="desde" class="form-label mb-1">Desde</label>
+          <input id="desde" type="date" class="form-control" formControlName="desde" />
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <label for="hasta" class="form-label mb-1">Hasta</label>
+          <input
+            id="hasta"
+            type="date"
+            class="form-control"
+            formControlName="hasta"
+            [class.is-invalid]="filtros.hasError('rango')"
+          />
+        </div>
+        <div class="col-12 col-md-auto d-flex gap-2">
+          <button type="submit" class="btn btn-primary" [disabled]="cargando()">Buscar</button>
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="onLimpiarClick()"
+            [disabled]="cargando()"
+          >
+            Limpiar
+          </button>
+        </div>
+      </div>
+      @if (filtros.hasError('rango')) {
+        <div class="text-danger small mt-2">
+          La fecha "hasta" debe ser igual o posterior a la fecha "desde".
+        </div>
+      }
+    </form>
+
+    @if (!esAdmin()) {
+      <hr class="my-3" />
+      @if (turnoActual()) {
+        <div class="form-check form-switch mb-0">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            id="verTodas"
+            [checked]="verTodas()"
+            [disabled]="cargando() || filtros.invalid"
+            (change)="onVerTodasChange()"
+          />
+          <label class="form-check-label" for="verTodas">Ver todas mis ventas</label>
+        </div>
+        @if (mostrandoSoloTurno()) {
+          <div class="text-secondary small mt-1">
+            Mostrando sólo las ventas de tu turno abierto.
+          </div>
+        }
+      } @else {
+        <div class="text-secondary small">
+          No tienes un turno abierto; se muestran todas tus ventas.
+        </div>
+      }
+    }
+  </div>
+</div>
+
+@if (cargando()) {
+  <div class="d-flex align-items-center gap-2 text-secondary">
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    Cargando ventas...
+  </div>
+} @else if (ventas().length === 0) {
+  <p class="text-secondary">No hay ventas con los filtros seleccionados.</p>
+} @else {
+  <p class="text-secondary small mb-2">{{ ventas().length }} venta(s)</p>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle bg-white mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Folio</th>
+          <th>Fecha</th>
+          @if (esAdmin()) {
+            <th>Cajero</th>
+          }
+          <th>Cliente</th>
+          <th class="text-end">Total</th>
+          <th>Estado</th>
+          <th class="text-end">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (v of ventas(); track v._id) {
+          <tr>
+            <td class="fw-semibold">{{ v.folio }}</td>
+            <td class="text-nowrap">{{ v.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+            @if (esAdmin()) {
+              <td>{{ nombreUsuario(v.usuario) }}</td>
+            }
+            <td>{{ nombreCliente(v.cliente) }}</td>
+            <td class="text-end">{{ v.total | currency: 'MXN' : 'symbol-narrow' }}</td>
+            <td>
+              <span
+                class="badge"
+                [class.text-bg-success]="v.estado === 'registrada'"
+                [class.text-bg-secondary]="v.estado === 'cancelada'"
+              >
+                {{ v.estado === 'registrada' ? 'Registrada' : 'Cancelada' }}
+              </span>
+            </td>
+            <td class="text-end text-nowrap">
+              <button
+                type="button"
+                class="btn btn-outline-secondary btn-sm"
+                (click)="onDetalleClick(v._id)"
+              >
+                {{ expandida() === v._id ? 'Ocultar' : 'Ver' }}
+              </button>
+              @if (puedeCancelar(v)) {
+                <button
+                  type="button"
+                  class="btn btn-outline-danger btn-sm ms-1"
+                  (click)="onCancelarClick(v)"
+                  [disabled]="enviando()"
+                >
+                  Cancelar
+                </button>
+              }
+            </td>
+          </tr>
+          @if (expandida() === v._id) {
+            <tr>
+              <td [attr.colspan]="columnas()" class="bg-light">
+                <div class="table-responsive">
+                  <table class="table table-sm mb-2 bg-white">
+                    <thead>
+                      <tr>
+                        <th>Producto</th>
+                        <th class="text-end">Cantidad</th>
+                        <th class="text-end">Precio unitario</th>
+                        <th class="text-end">Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (r of v.renglones; track $index) {
+                        <tr>
+                          <td>{{ r.nombre }}</td>
+                          <td class="text-end">{{ r.cantidad }}</td>
+                          <td class="text-end">
+                            {{ r.precioUnitario | currency: 'MXN' : 'symbol-narrow' }}
+                          </td>
+                          <td class="text-end">
+                            {{ r.subtotal | currency: 'MXN' : 'symbol-narrow' }}
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+                <div class="d-flex flex-wrap gap-4 small">
+                  <span
+                    >Total: <strong>{{ v.total | currency: 'MXN' : 'symbol-narrow' }}</strong></span
+                  >
+                  <span
+                    >Pago recibido:
+                    <strong>{{ v.pagoRecibido | currency: 'MXN' : 'symbol-narrow' }}</strong></span
+                  >
+                  <span
+                    >Cambio:
+                    <strong>{{ v.cambio | currency: 'MXN' : 'symbol-narrow' }}</strong></span
+                  >
+                </div>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+<app-confirmar
+  [abierto]="cancelando() !== null"
+  titulo="Cancelar venta"
+  [mensaje]="mensajeCancelar()"
+  textoAceptar="Cancelar venta"
+  [peligroso]="true"
+  (aceptar)="onConfirmarCancelarClick()"
+  (cancelar)="onCancelarDialogoClick()"
+/>

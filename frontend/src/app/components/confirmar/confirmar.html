@@ -1,0 +1,42 @@
+@if (abierto()) {
+  <div
+    class="modal d-block"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="titulo-confirmar"
+    (click)="onCancelarClick()"
+    (keydown.escape)="onCancelarClick()"
+  >
+    <div class="modal-dialog modal-dialog-centered" (click)="onDialogoClick($event)">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="titulo-confirmar">{{ titulo() }}</h5>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Cerrar"
+            (click)="onCancelarClick()"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0">{{ mensaje() }}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" (click)="onCancelarClick()">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn"
+            [class.btn-danger]="peligroso()"
+            [class.btn-primary]="!peligroso()"
+            (click)="onAceptarClick()"
+          >
+            {{ textoAceptar() }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

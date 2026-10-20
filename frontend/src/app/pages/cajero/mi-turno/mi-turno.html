@@ -1,0 +1,210 @@
+<h2 class="h4 mb-3">Mi turno y corte de caja</h2>
+
+@if (cargando()) {
+  <div class="d-flex align-items-center gap-2 text-secondary">
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    Cargando turno...
+  </div>
+} @else if (turno(); as t) {
+  <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+    <span class="badge text-bg-success">Turno abierto</span>
+    <span class="text-secondary small"
+      >Los totales se actualizan con cada venta registrada o cancelada.</span
+    >
+  </div>
+
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-5 g-3 mb-4">
+    <div class="col">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="text-secondary small">Apertura</div>
+          <div class="fs-5 fw-semibold">{{ t.fechaApertura | date: 'dd/MM/yyyy HH:mm' }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="text-secondary small">Fondo inicial</div>
+          <div class="fs-5 fw-semibold">
+            {{ t.fondoInicial | currency: 'MXN' : 'symbol-narrow' }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="text-secondary small">Total vendido</div>
+          <div class="fs-5 fw-semibold">
+            {{ t.totalVendido | currency: 'MXN' : 'symbol-narrow' }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="text-secondary small">Tickets</div>
+          <div class="fs-5 fw-semibold">{{ t.numeroTickets }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card h-100 border-primary">
+        <div class="card-body">
+          <div class="text-secondary small">Efectivo esperado</div>
+          <div class="fs-5 fw-semibold text-primary">
+            {{ efectivoEsperado() | currency: 'MXN' : 'symbol-narrow' }}
+          </div>
+          <div class="text-secondary small">fondo + vendido</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-white fw-semibold">Corte de caja</div>
+    <div class="card-body">
+      <p class="text-secondary small mb-3">
+        Cuenta el efectivo que hay en la caja (incluyendo el fondo inicial) y captúralo para cerrar
+        el turno.
+      </p>
+      <form [formGroup]="formCerrar" (ngSubmit)="onCerrarSubmit()" novalidate>
+        <div class="row g-3 align-items-start">
+          <div class="col-sm-6 col-lg-4">
+            <label for="efectivoContado" class="form-label">Efectivo contado</label>
+            <div class="input-group has-validation">
+              <span class="input-group-text">$</span>
+              <input
+                id="efectivoContado"
+                type="number"
+                min="0"
+                step="0.01"
+                class="form-control"
+                placeholder="0.00"
+                formControlName="efectivoContado"
+                [class.is-invalid]="mostrarError(formCerrar.controls.efectivoContado)"
+              />
+              <div class="invalid-feedback">
+                @if (formCerrar.controls.efectivoContado.hasError('required')) {
+                  Captura el efectivo contado.
+                } @else if (formCerrar.controls.efectivoContado.hasError('min')) {
+                  El efectivo no puede ser negativo.
+                }
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-auto pt-sm-4">
+            <button type="submit" class="btn btn-danger mt-sm-2" [disabled]="enviando()">
+              @if (enviando()) {
+                <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+              }
+              Cerrar turno
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+} @else if (corte(); as c) {
+  <div class="card mb-3">
+    <div
+      class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2"
+    >
+      <span class="fw-semibold">Corte de caja realizado</span>
+      <span class="badge text-bg-secondary">Turno cerrado</span>
+    </div>
+    <div class="card-body">
+      <dl class="row mb-0">
+        <dt class="col-sm-4 col-lg-3 text-secondary fw-normal">Apertura</dt>
+        <dd class="col-sm-8 col-lg-9">{{ c.fechaApertura | date: 'dd/MM/yyyy HH:mm' }}</dd>
+
+        <dt class="col-sm-4 col-lg-3 text-secondary fw-normal">Cierre</dt>
+        <dd class="col-sm-8 col-lg-9">{{ c.fechaCierre | date: 'dd/MM/yyyy HH:mm' }}</dd>
+
+        <dt class="col-sm-4 col-lg-3 text-secondary fw-normal">Fondo inicial</dt>
+        <dd class="col-sm-8 col-lg-9">{{ c.fondoInicial | currency: 'MXN' : 'symbol-narrow' }}</dd>
+
+        <dt class="col-sm-4 col-lg-3 text-secondary fw-normal">Total vendido</dt>
+        <dd class="col-sm-8 col-lg-9">
+          {{ c.totalVendido | currency: 'MXN' : 'symbol-narrow' }} ({{ c.numeroTickets }} tickets)
+        </dd>
+
+        <dt class="col-sm-4 col-lg-3 text-secondary fw-normal">Efectivo esperado</dt>
+        <dd class="col-sm-8 col-lg-9">
+          {{ c.efectivoEsperado | currency: 'MXN' : 'symbol-narrow' }}
+        </dd>
+
+        <dt class="col-sm-4 col-lg-3 text-secondary fw-normal">Efectivo contado</dt>
+        <dd class="col-sm-8 col-lg-9">
+          {{ c.efectivoContado | currency: 'MXN' : 'symbol-narrow' }}
+        </dd>
+
+        <dt class="col-sm-4 col-lg-3 text-secondary fw-normal">Diferencia</dt>
+        <dd class="col-sm-8 col-lg-9 fw-semibold fs-5" [class]="claseDiferencia(c.diferencia)">
+          {{ c.diferencia | currency: 'MXN' : 'symbol-narrow' }}
+          <span class="fs-6 fw-normal">- {{ textoDiferencia(c.diferencia) }}</span>
+        </dd>
+      </dl>
+    </div>
+  </div>
+  <button type="button" class="btn btn-primary" (click)="onNuevoTurnoClick()">
+    Abrir nuevo turno
+  </button>
+} @else {
+  <div class="row">
+    <div class="col-md-7 col-lg-5">
+      <div class="card">
+        <div class="card-header bg-white fw-semibold">Abrir turno</div>
+        <div class="card-body">
+          <p class="text-secondary small mb-3">
+            No tienes un turno abierto. Captura el fondo de caja con el que inicias para poder
+            registrar ventas.
+          </p>
+          <form [formGroup]="formAbrir" (ngSubmit)="onAbrirSubmit()" novalidate>
+            <div class="mb-3">
+              <label for="fondoInicial" class="form-label">Fondo inicial</label>
+              <div class="input-group has-validation">
+                <span class="input-group-text">$</span>
+                <input
+                  id="fondoInicial"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="form-control"
+                  placeholder="0.00"
+                  formControlName="fondoInicial"
+                  [class.is-invalid]="mostrarError(formAbrir.controls.fondoInicial)"
+                />
+                <div class="invalid-feedback">
+                  @if (formAbrir.controls.fondoInicial.hasError('required')) {
+                    Captura el fondo inicial (puede ser 0).
+                  } @else if (formAbrir.controls.fondoInicial.hasError('min')) {
+                    El fondo no puede ser negativo.
+                  }
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="enviando()">
+              @if (enviando()) {
+                <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+              }
+              Abrir turno
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<app-confirmar
+  [abierto]="confirmandoCierre()"
+  titulo="Cerrar turno"
+  [mensaje]="mensajeCierre()"
+  textoAceptar="Cerrar turno"
+  [peligroso]="true"
+  (aceptar)="onConfirmarCierreClick()"
+  (cancelar)="onCancelarDialogoClick()"
+/>

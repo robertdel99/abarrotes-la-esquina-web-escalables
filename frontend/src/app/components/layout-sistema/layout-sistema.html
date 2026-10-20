@@ -1,0 +1,48 @@
+<nav class="navbar bg-white border-bottom sticky-top">
+  <div class="container-fluid">
+    <div class="d-flex align-items-center gap-2">
+      <button
+        class="btn btn-outline-secondary btn-sm d-md-none"
+        type="button"
+        aria-label="Menú"
+        (click)="onMenuClick()"
+      >
+        Menú
+      </button>
+      <a class="navbar-brand fw-semibold text-primary mb-0" routerLink="/">Abarrotes La Esquina</a>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <span class="small text-secondary d-none d-sm-inline"
+        >{{ nombreCompleto() }} - {{ nombreRol() }}</span
+      >
+      <button class="btn btn-outline-secondary btn-sm" type="button" (click)="onSalirClick()">
+        Salir
+      </button>
+    </div>
+  </div>
+</nav>
+<div class="container-fluid">
+  <div class="row">
+    <aside
+      class="col-md-3 col-lg-2 border-end bg-white py-3 menu-lateral d-md-block"
+      [class.d-none]="!menuAbierto()"
+    >
+      <ul class="nav flex-column gap-1">
+        @for (opcion of opciones(); track opcion.ruta) {
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [routerLink]="opcion.ruta"
+              routerLinkActive="active"
+              (click)="onOpcionClick()"
+              >{{ opcion.texto }}</a
+            >
+          </li>
+        }
+      </ul>
+    </aside>
+    <main class="col-md-9 col-lg-10 py-4">
+      <router-outlet />
+    </main>
+  </div>
+</div>

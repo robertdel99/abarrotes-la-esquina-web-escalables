@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "MongoDB: iniciar",
+      "type": "shell",
+      "command": "./scripts/iniciar-mongo.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: npm run dev",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "group": "servidores" }
+    },
+    {
+      "label": "Frontend: npm start",
+      "type": "shell",
+      "command": "npm start",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": { "panel": "dedicated", "group": "servidores" }
+    },
+    {
+      "label": "Backend: cargar datos de prueba (seed)",
+      "type": "shell",
+      "command": "npm run seed",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: pruebas de la API",
+      "type": "shell",
+      "command": "npm run prueba",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Arrancar todo (Mongo + API + Angular)",
+      "dependsOn": ["MongoDB: iniciar", "Backend: npm run dev", "Frontend: npm start"],
+      "problemMatcher": []
+    }
+  ]
+}

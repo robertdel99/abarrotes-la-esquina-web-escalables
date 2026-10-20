@@ -1,0 +1,246 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h2 class="h4 mb-0">Proveedores</h2>
+  <div class="d-flex gap-2">
+    <button
+      type="button"
+      class="btn btn-outline-secondary btn-sm"
+      (click)="onActualizarClick()"
+      [disabled]="cargando()"
+    >
+      Actualizar
+    </button>
+    @if (puedeEditar()) {
+      <button
+        type="button"
+        class="btn btn-primary btn-sm"
+        (click)="onNuevoClick()"
+        [disabled]="guardando()"
+      >
+        Nuevo proveedor
+      </button>
+    }
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-body">
+        @if (cargando()) {
+          <div class="text-secondary py-3 text-center">
+            <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+            Cargando proveedores...
+          </div>
+        } @else if (proveedores().length === 0) {
+          <p class="text-secondary py-3 text-center mb-0">No hay proveedores registrados.</p>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Contacto</th>
+                  <th>Teléfono</th>
+                  <th>Correo</th>
+                  <th>Activo</th>
+                  <th class="text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (proveedor of proveedores(); track proveedor._id) {
+                  <tr [class.table-active]="editando()?._id === proveedor._id">
+                    <td class="fw-semibold">{{ proveedor.nombre }}</td>
+                    <td class="text-secondary">{{ proveedor.contacto || '-' }}</td>
+                    <td class="text-nowrap">{{ proveedor.telefono || '-' }}</td>
+                    <td class="text-secondary">{{ proveedor.correo || '-' }}</td>
+                    <td>
+                      @if (proveedor.activo) {
+                        <span class="badge text-bg-primary">Activo</span>
+                      } @else {
+                        <span class="badge text-bg-secondary">Inactivo</span>
+                      }
+                    </td>
+                    <td class="text-end text-nowrap">
+                      @if (puedeEditar()) {
+                        <button
+                          type="button"
+                          class="btn btn-outline-primary btn-sm"
+                          (click)="onEditarClick(proveedor)"
+                          [disabled]="guardando()"
+                        >
+                          Editar
+                        </button>
+                      }
+                      @if (puedeEliminar()) {
+                        <button
+                          type="button"
+                          class="btn btn-outline-danger btn-sm ms-1"
+                          (click)="onEliminarClick(proveedor)"
+                          [disabled]="eliminando()"
+                        >
+                          Eliminar
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <p class="small text-secondary mt-2 mb-0">{{ proveedores().length }} proveedor(es)</p>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (puedeEditar()) {
+    <div class="col-lg-5">
+      <div class="card">
+        <div class="card-header bg-white fw-semibold">
+          {{ editando() ? 'Editar proveedor' : 'Nuevo proveedor' }}
+        </div>
+        <div class="card-body">
+          <form [formGroup]="formulario" (ngSubmit)="onSubmit()" novalidate>
+            <div class="mb-3">
+              <label for="prov-nombre" class="form-label"
+                >Nombre <span class="text-danger">*</span></label
+              >
+              <input
+                id="prov-nombre"
+                type="text"
+                class="form-control"
+                formControlName="nombre"
+                maxlength="80"
+                placeholder="Ej. Distribuidora del Centro"
+                [class.is-invalid]="invalido(formulario.controls.nombre)"
+              />
+              @if (invalido(formulario.controls.nombre)) {
+                <div class="invalid-feedback">
+                  @if (formulario.controls.nombre.hasError('maxlength')) {
+                    El nombre no debe pasar de 80 caracteres.
+                  } @else {
+                    El nombre es obligatorio.
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="mb-3">
+              <label for="prov-contacto" class="form-label">Persona de contacto</label>
+              <input
+                id="prov-contacto"
+                type="text"
+                class="form-control"
+                formControlName="contacto"
+                maxlength="80"
+                placeholder="Opcional"
+                [class.is-invalid]="invalido(formulario.controls.contacto)"
+              />
+              @if (invalido(formulario.controls.contacto)) {
+                <div class="invalid-feedback">El contacto no debe pasar de 80 caracteres.</div>
+              }
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-sm-5">
+                <label for="prov-telefono" class="form-label">Teléfono</label>
+                <input
+                  id="prov-telefono"
+                  type="tel"
+                  class="form-control"
+                  formControlName="telefono"
+                  maxlength="20"
+                  placeholder="444 123 4567"
+                  [class.is-invalid]="invalido(formulario.controls.telefono)"
+                />
+                @if (invalido(formulario.controls.telefono)) {
+                  <div class="invalid-feedback">
+                    @if (formulario.controls.telefono.hasError('pattern')) {
+                      Sólo números, espacios, paréntesis, + o guiones.
+                    } @else {
+                      El teléfono no debe pasar de 20 caracteres.
+                    }
+                  </div>
+                }
+              </div>
+              <div class="col-sm-7">
+                <label for="prov-correo" class="form-label">Correo</label>
+                <input
+                  id="prov-correo"
+                  type="email"
+                  class="form-control"
+                  formControlName="correo"
+                  maxlength="100"
+                  placeholder="ventas@proveedor.com"
+                  [class.is-invalid]="invalido(formulario.controls.correo)"
+                />
+                @if (invalido(formulario.controls.correo)) {
+                  <div class="invalid-feedback">
+                    @if (formulario.controls.correo.hasError('email')) {
+                      Escribe un correo válido.
+                    } @else {
+                      El correo no debe pasar de 100 caracteres.
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="prov-direccion" class="form-label">Dirección</label>
+              <textarea
+                id="prov-direccion"
+                class="form-control"
+                rows="2"
+                formControlName="direccion"
+                maxlength="200"
+                placeholder="Opcional"
+                [class.is-invalid]="invalido(formulario.controls.direccion)"
+              ></textarea>
+              @if (invalido(formulario.controls.direccion)) {
+                <div class="invalid-feedback">La dirección no debe pasar de 200 caracteres.</div>
+              }
+            </div>
+
+            <div class="form-check form-switch mb-3">
+              <input
+                id="prov-activo"
+                type="checkbox"
+                class="form-check-input"
+                formControlName="activo"
+              />
+              <label for="prov-activo" class="form-check-label">Proveedor activo</label>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+                @if (guardando()) {
+                  <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                }
+                {{ editando() ? 'Guardar cambios' : 'Guardar' }}
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                (click)="onCancelarClick()"
+                [disabled]="guardando()"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<app-confirmar
+  [abierto]="aEliminar() !== null"
+  titulo="Eliminar proveedor"
+  [mensaje]="mensajeEliminar()"
+  textoAceptar="Eliminar"
+  [peligroso]="true"
+  (aceptar)="onConfirmarEliminar()"
+  (cancelar)="onCancelarEliminar()"
+/>

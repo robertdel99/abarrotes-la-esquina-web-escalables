@@ -1,0 +1,58 @@
+:root {
+  --verde: #2e7d32;
+  --verde-oscuro: #1b5e20;
+  --verde-claro: #e8f5e9;
+  --bs-link-color: var(--verde);
+  --bs-link-hover-color: var(--verde-oscuro);
+  --bs-link-color-rgb: 46, 125, 50;
+  --bs-link-hover-color-rgb: 27, 94, 32;
+}
+body {
+  background: #f8f9fa;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--verde);
+  --bs-btn-border-color: var(--verde);
+  --bs-btn-hover-bg: var(--verde-oscuro);
+  --bs-btn-hover-border-color: var(--verde-oscuro);
+  --bs-btn-active-bg: var(--verde-oscuro);
+  --bs-btn-active-border-color: var(--verde-oscuro);
+  --bs-btn-disabled-bg: var(--verde);
+  --bs-btn-disabled-border-color: var(--verde);
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--verde);
+  --bs-btn-border-color: var(--verde);
+  --bs-btn-hover-bg: var(--verde);
+  --bs-btn-hover-border-color: var(--verde);
+  --bs-btn-active-bg: var(--verde);
+  --bs-btn-active-border-color: var(--verde);
+}
+.text-primary {
+  color: var(--verde) !important;
+}
+.bg-primary {
+  background-color: var(--verde) !important;
+}
+.border-primary {
+  border-color: var(--verde) !important;
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--verde);
+  box-shadow: 0 0 0 0.25rem rgba(46, 125, 50, 0.25);
+}
+.badge.text-bg-primary {
+  background-color: var(--verde) !important;
+}
+.nav-pills .nav-link.active {
+  background-color: var(--verde);
+}
+
+.tarjeta-producto img,
+.tarjeta-producto .sin-imagen {
+  height: 150px;
+  object-fit: cover;
+  background: #e9ecef;
+}

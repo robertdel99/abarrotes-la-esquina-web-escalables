@@ -1,6 +1,6 @@
 # Estado del proyecto
 
-Avance al 19 de octubre de 2026. El sistema cubre el alcance completo de la propuesta y corre en local con MongoDB.
+avance del tercer parcial. el catálogo público ya filtra existencias y ofertas desde la api, muestra ocho productos por página y conserva la búsqueda al volver de un producto.
 
 ## Funciona
 
@@ -18,7 +18,7 @@ Avance al 19 de octubre de 2026. El sistema cubre el alcance completo de la prop
 - Imagen de producto por archivo: hoy se captura como URL. Sería una mejora, no parte del alcance.
 - Despliegue en un servidor; por ahora corre en local.
 - Pruebas unitarias de Angular (no exigidas por la rúbrica).
-- Paginación de listados grandes; con el volumen de una tienda no hace falta.
+- los listados del área privada todavía se muestran completos.
 
 ## Próximos pasos
 

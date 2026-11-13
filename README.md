@@ -1,32 +1,13 @@
-# Abarrotes La Esquina
+abarrotes la esquina
 
-Punto de venta para una tienda de abarrotes. Proyecto de Aplicaciones Web Escalables (UASLP, 2026-2027/I).
-Hecho con MongoDB, Express, Angular y Node.
+punto de venta para una tienda de abarrotes. en el avance del tercer parcial mejoré el catálogo público. puedes buscar un producto, elegir su categoría y ver solo lo que hay en existencia o en oferta. se muestran ocho productos por página. al abrir un producto y volver, sigues en la misma página con los mismos filtros.
 
-## Para correrlo
+para correrlo necesitas node 22.12 o node 24 y mongodb en tu equipo.
 
-Se necesita Node y MongoDB corriendo en `mongodb://127.0.0.1:27017`.
+en la carpeta backend, ejecuta cp .env.example .env y luego npm ci. si es tu primera prueba, usa npm run seed en una base de prueba: este comando borra los datos de esa base y carga los de ejemplo. arranca la api con npm run dev.
 
-Backend:
-```bash
-cd backend
-cp .env.example .env
-npm install
-npm run seed      # datos de prueba
-npm run dev       # http://localhost:3000
-```
+en otra terminal, entra a frontend y ejecuta npm ci y npm start. abre http://localhost:4200/catalogo. puedes consultar el catálogo sin iniciar sesión.
 
-Frontend (en otra terminal):
-```bash
-cd frontend
-npm install
-npm start         # http://localhost:4200
-```
+si quieres entrar a caja o al inventario, las cuentas de ejemplo están en backend/src/seed.js.
 
-## Usuarios de prueba
-
-- Administrador: `admin@laesquina.com` / `Admin1234`
-- Cajero: `cajero@laesquina.com` / `Cajero1234`
-- Auxiliar: `auxiliar@laesquina.com` / `Auxiliar1234`
-
-La propuesta y las rutas de la API están en `docs/`.
+para probar el avance con los datos de ejemplo, pulsa siguiente, abre un producto y vuelve al catálogo. después marca en oferta para ver solo los productos con descuento.

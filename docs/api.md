@@ -24,6 +24,8 @@ Roles: **público** (sin sesión), `cajero`, `auxiliar`, `administrador`. Un rol
 | GET | `/api/publico/productos` | público |
 | GET | `/api/publico/productos/:id` | público |
 
+El catálogo acepta `buscar`, `categoria`, `disponibles=true` y `ofertas=true` juntos. Con `pagina=1` devuelve `productos` (hasta ocho), `total`, `pagina` y `paginas`. Si se pide una página posterior a la última, devuelve la última. Sin `pagina` entrega el arreglo completo filtrado.
+
 ## `/api/categorias`
 
 | Método | Ruta | Quién puede |

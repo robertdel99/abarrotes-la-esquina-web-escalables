@@ -11,19 +11,20 @@
   <div class="col-12 col-md-7">
     <div class="input-group">
       <input
+        #texto
         type="search"
         class="form-control"
         placeholder="Buscar producto por nombre"
         aria-label="Buscar producto por nombre"
         [value]="busqueda()"
-        (input)="onBusquedaInput($event)"
-        (keydown.enter)="onBuscarClick()"
+        (input)="escribir(texto.value)"
+        (keydown.enter)="aplicar()"
       />
       @if (busqueda()) {
         <button
           type="button"
           class="btn btn-outline-secondary"
-          (click)="onLimpiarClick()"
+          (click)="limpiarBusqueda()"
           aria-label="Limpiar búsqueda"
         >
           &times;
@@ -32,7 +33,7 @@
       <button
         type="button"
         class="btn btn-primary"
-        (click)="onBuscarClick()"
+        (click)="aplicar()"
         [disabled]="cargando()"
       >
         Buscar
@@ -41,9 +42,10 @@
   </div>
   <div class="col-12 col-md-5">
     <select
+      #categoria
       class="form-select"
       aria-label="Filtrar por categoría"
-      (change)="onCategoriaChange($event)"
+      (change)="aplicar({ categoria: categoria.value })"
     >
       <option value="" [selected]="categoriaSeleccionada() === ''">Todas las categorías</option>
       @for (c of categorias(); track c._id) {
@@ -53,6 +55,18 @@
       }
     </select>
   </div>
+  <div class="col-12 d-flex flex-wrap gap-3 pt-1">
+    <label class="form-check">
+      <input #disponibles type="checkbox" class="form-check-input" [checked]="soloDisponibles()"
+        (change)="aplicar({ disponibles: disponibles.checked })" />
+      Con existencias
+    </label>
+    <label class="form-check">
+      <input #ofertas type="checkbox" class="form-check-input" [checked]="soloOfertas()"
+        (change)="aplicar({ ofertas: ofertas.checked })" />
+      En oferta
+    </label>
+  </div>
 </div>
 
 @if (cargando()) {
@@ -60,20 +74,17 @@
     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
     Cargando productos...
   </div>
-} @else if (visibles().length === 0) {
-  <p class="text-secondary">
-    @if (soloOfertas()) {
-      No hay productos en oferta.
-    } @else {
-      No hay productos.
-    }
-  </p>
+} @else if (error()) {
+  <p role="alert">No se pudo cargar el catálogo.</p>
+  <button class="btn btn-outline-secondary" type="button" (click)="reintentar()">Reintentar</button>
+} @else if (total() === 0) {
+  <p class="text-secondary" role="status">No hay productos que coincidan con tu búsqueda.</p>
 } @else {
-  <p class="small text-secondary mb-2">
-    {{ visibles().length }} producto{{ visibles().length === 1 ? '' : 's' }}
+  <p class="small text-secondary mb-2" role="status">
+    {{ total() }} producto{{ total() === 1 ? '' : 's' }}
   </p>
   <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-    @for (p of visibles(); track p._id) {
+    @for (p of productos(); track p._id) {
       <div class="col">
         <div class="card h-100 tarjeta-producto">
           @if (tieneImagen(p)) {
@@ -94,6 +105,7 @@
             <h3 class="h6 mb-1">
               <a
                 [routerLink]="['/catalogo', p._id]"
+                queryParamsHandling="preserve"
                 class="stretched-link text-reset text-decoration-none"
                 >{{ p.nombre }}</a
               >
@@ -125,4 +137,13 @@
       </div>
     }
   </div>
+  @if (paginas() > 1) {
+    <nav aria-label="Páginas del catálogo" class="d-flex flex-wrap gap-3 align-items-center mt-4">
+      <button class="btn btn-outline-secondary btn-sm" type="button" [disabled]="pagina() === 1"
+        (click)="aplicar({ pagina: pagina() - 1 })">Anterior</button>
+      <span class="small">Página {{ pagina() }} de {{ paginas() }}</span>
+      <button class="btn btn-outline-secondary btn-sm" type="button" [disabled]="pagina() === paginas()"
+        (click)="aplicar({ pagina: pagina() + 1 })">Siguiente</button>
+    </nav>
+  }
 }

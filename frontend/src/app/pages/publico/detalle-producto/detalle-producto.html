@@ -1,5 +1,5 @@
 <div class="mb-3">
-  <a routerLink="/catalogo" class="btn btn-outline-secondary btn-sm">&larr; Volver al catálogo</a>
+  <a routerLink="/catalogo" queryParamsHandling="preserve" class="btn btn-outline-secondary btn-sm">&larr; Volver al catálogo</a>
 </div>
 
 @switch (estado()) {
@@ -16,7 +16,7 @@
         <p class="text-secondary mb-3">
           Puede que ya no esté a la venta o que la dirección sea incorrecta.
         </p>
-        <a routerLink="/catalogo" class="btn btn-primary">Volver al catálogo</a>
+        <a routerLink="/catalogo" queryParamsHandling="preserve" class="btn btn-primary">Volver al catálogo</a>
       </div>
     </div>
   }

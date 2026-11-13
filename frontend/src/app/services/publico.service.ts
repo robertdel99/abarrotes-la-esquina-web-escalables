@@ -5,6 +5,13 @@ import { Categoria, InfoTienda, Producto } from '../interfaces';
 import { aParams } from '../utils/params';
 import { contextoSilencioso } from '../interceptors/http-context';
 
+export interface PaginaCatalogo {
+  productos: Producto[];
+  total: number;
+  pagina: number;
+  paginas: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PublicoService {
   private base = '/api/publico';
@@ -25,6 +32,10 @@ export class PublicoService {
   producto(id: string, silenciarErrores = false): Observable<Producto> {
     const opciones = { context: contextoSilencioso(silenciarErrores) };
     return this.http.get<Producto>(`${this.base}/productos/${id}`, opciones);
+  }
+
+  catalogo(filtros: { buscar: string; categoria: string; ofertas: boolean; disponibles: boolean; pagina: number }): Observable<PaginaCatalogo> {
+    return this.http.get<PaginaCatalogo>(`${this.base}/productos`, { params: aParams(filtros) });
   }
 
   ofertas(): Observable<Producto[]> {

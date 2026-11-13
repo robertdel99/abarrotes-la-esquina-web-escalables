@@ -49,6 +49,17 @@ async function main() {
   );
   r = await api('GET', '/api/publico/ofertas');
   ok(r.status === 200 && r.data.length === 3, 'ofertas de la semana (3)');
+  const primera = await api('GET', '/api/publico/productos?pagina=1');
+  const ultima = await api('GET', '/api/publico/productos?pagina=99');
+  const ids = [...primera.data.productos, ...ultima.data.productos].map((p) => p._id);
+  ok(primera.data.total === 12 && primera.data.productos.length === 8 && ultima.data.pagina === 2
+    && ultima.data.productos.length === 4 && new Set(ids).size === 12, 'dos páginas sin productos repetidos');
+  r = await api('GET', '/api/publico/productos?pagina=1&ofertas=true&disponibles=true&buscar=aceite');
+  ok(r.data.total === 1 && r.data.productos[0].codigo === 'A-1001', 'combinar filtros y búsqueda');
+  r = await api('GET', '/api/publico/productos?pagina=1&buscar=detergente&disponibles=true');
+  ok(r.data.total === 0 && r.data.productos.length === 0, 'excluir el detergente agotado');
+  r = await api('GET', '/api/publico/productos?pagina=0');
+  ok(r.status === 400, 'rechazar número de página inválido');
   r = await api('GET', '/api/publico/tienda');
   ok(r.status === 200 && r.data.nombre, 'datos de la tienda');
   r = await api('GET', '/api/productos');

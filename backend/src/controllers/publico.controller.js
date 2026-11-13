@@ -23,17 +23,30 @@ const listarCategorias = asyncHandler(async (req, res) => {
 });
 
 const listarProductos = asyncHandler(async (req, res) => {
-  const { buscar, categoria } = req.query;
+  const { buscar, categoria, ofertas, disponibles, pagina } = req.query;
   const filtro = { activo: true };
+  if (ofertas === 'true') filtro.enOferta = true;
+  if (disponibles === 'true') filtro.existencia = { $gt: 0 };
   if (typeof categoria === 'string' && categoria) filtro.categoria = categoria;
   if (typeof buscar === 'string' && buscar.trim())
     filtro.nombre = { $regex: escaparRegex(buscar.trim()), $options: 'i' };
 
-  const productos = await Producto.find(filtro)
+  const consulta = Producto.find(filtro)
     .select(CAMPOS_PUBLICOS)
     .populate('categoria', 'nombre')
-    .sort('nombre');
-  res.json(productos.map(aPublico));
+    .sort({ nombre: 1, _id: 1 });
+  if (pagina === undefined) return res.json((await consulta).map(aPublico));
+
+  const solicitada = Number(pagina);
+  if (typeof pagina !== 'string' || !/^\d+$/.test(pagina) || !Number.isSafeInteger(solicitada) || solicitada < 1) {
+    throw new ApiError(400, 'La página debe ser un entero positivo');
+  }
+  const porPagina = 8;
+  const total = await Producto.countDocuments(filtro);
+  const paginas = Math.max(1, Math.ceil(total / porPagina));
+  const actual = Math.min(solicitada, paginas);
+  const productos = await consulta.skip((actual - 1) * porPagina).limit(porPagina);
+  res.json({ productos: productos.map(aPublico), total, pagina: actual, paginas });
 });
 
 const obtenerProducto = asyncHandler(async (req, res) => {
